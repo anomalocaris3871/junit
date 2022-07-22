@@ -1,26 +1,48 @@
 package me.dongguen.junit;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import java.time.Duration;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.junit.jupiter.api.Assumptions.assumingThat;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class StudyTest {
 
     @Test
     @DisplayName("")
+    @EnabledOnOs(OS.WINDOWS)
+    @Tag("fast")
     void create_new_study() {
-
-
+        System.out.println(System.getenv("USERNAME"));
+        //특정 환경변수에서만 실행
+        assumeTrue("anoma".equalsIgnoreCase(System.getenv("USERNAME")));
         assertThrows(IllegalArgumentException.class, ()-> new Study(-10));
 
 
-        assertTimeoutPreemptively(Duration.ofMillis(100), () -> {
+        assumingThat("LOCAL".equalsIgnoreCase(System.getenv("USERNAME")), () -> {
+            Study actual = new Study(10);
+            assertThat(actual.getLimit()).isGreaterThan(0);
+        });
+
+        assumingThat("anoma".equalsIgnoreCase(System.getenv("USERNAME")), () -> {
+            Study actual = new Study(10);
+            assertThat(actual.getLimit()).isGreaterThan(5);
+        });
+
+
+/*        assertTimeoutPreemptively(Duration.ofMillis(100), () -> {
             new Study(10);
             Thread.sleep(300);
-        });
+        });*//*        assertTimeoutPreemptively(Duration.ofMillis(100), () -> {
+            new Study(10);
+            Thread.sleep(300);
+        });*/
 
 
 /*
@@ -37,6 +59,7 @@ class StudyTest {
 
 
     @Test
+    @Tag("slow")
     void create_new_study_again() {
         System.out.println("create1");
     }
