@@ -1,8 +1,12 @@
 package me.dongguen.junit;
 
+import me.dongguen.junit.annotation.FastTest;
+import me.dongguen.junit.annotation.SlowTest;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.Duration;
 
@@ -14,10 +18,9 @@ import static org.junit.jupiter.api.Assumptions.assumingThat;
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class StudyTest {
 
-    @Test
     @DisplayName("")
     @EnabledOnOs(OS.WINDOWS)
-    @Tag("fast")
+    @FastTest
     void create_new_study() {
         System.out.println(System.getenv("USERNAME"));
         //특정 환경변수에서만 실행
@@ -58,10 +61,22 @@ class StudyTest {
     }
 
 
-    @Test
-    @Tag("slow")
+    @SlowTest
     void create_new_study_again() {
         System.out.println("create1");
+    }
+
+    @DisplayName("make study")
+    @RepeatedTest(value = 10, name = "{displayName}, {currentRepetition}/{totalRepetitions}")
+    void repeat_test(RepetitionInfo repetitionInfo) {
+        System.out.println("test" + repetitionInfo.getCurrentRepetition()+ "/" + repetitionInfo.getTotalRepetitions())  ;
+    }
+
+    @DisplayName("make study")
+    @ParameterizedTest(name = "{index} {displayName} message={0}")
+    @ValueSource(strings = {"날씨가", "많이", "추워지고", "있네요"})
+    void parameterizedTest(String message) {
+        System.out.println(message);
     }
 
     @BeforeAll
