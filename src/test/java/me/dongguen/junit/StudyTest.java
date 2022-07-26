@@ -5,7 +5,18 @@ import me.dongguen.junit.annotation.SlowTest;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
+import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.aggregator.AggregateWith;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import org.junit.jupiter.params.aggregator.ArgumentsAggregationException;
+import org.junit.jupiter.params.aggregator.ArgumentsAggregator;
+import org.junit.jupiter.params.converter.ArgumentConversionException;
+import org.junit.jupiter.params.converter.ConvertWith;
+import org.junit.jupiter.params.converter.SimpleArgumentConverter;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EmptySource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.Duration;
@@ -25,7 +36,7 @@ class StudyTest {
         System.out.println(System.getenv("USERNAME"));
         //특정 환경변수에서만 실행
         assumeTrue("anoma".equalsIgnoreCase(System.getenv("USERNAME")));
-        assertThrows(IllegalArgumentException.class, ()-> new Study(-10));
+        assertThrows(IllegalArgumentException.class, () -> new Study(-10));
 
 
         assumingThat("LOCAL".equalsIgnoreCase(System.getenv("USERNAME")), () -> {
@@ -69,19 +80,59 @@ class StudyTest {
     @DisplayName("make study")
     @RepeatedTest(value = 10, name = "{displayName}, {currentRepetition}/{totalRepetitions}")
     void repeat_test(RepetitionInfo repetitionInfo) {
-        System.out.println("test" + repetitionInfo.getCurrentRepetition()+ "/" + repetitionInfo.getTotalRepetitions())  ;
+        System.out.println("test" + repetitionInfo.getCurrentRepetition() + "/" + repetitionInfo.getTotalRepetitions());
     }
 
     @DisplayName("make study")
     @ParameterizedTest(name = "{index} {displayName} message={0}")
     @ValueSource(strings = {"날씨가", "많이", "추워지고", "있네요"})
+    @EmptySource
+    @NullSource
     void parameterizedTest(String message) {
         System.out.println(message);
     }
 
+    @ParameterizedTest(name = "{index} message = {0}")
+    @ValueSource(ints = {10, 20, 40})
+    void parameterizedTest2(@ConvertWith(StudyConverter.class) Study study) {
+        System.out.println(study.getLimit());
+    }
+
+    static class StudyConverter extends SimpleArgumentConverter {
+        @Override
+        protected Object convert(Object source, Class<?> targetType) throws ArgumentConversionException {
+            assertEquals(Study.class, targetType, "Can only convert to Study");
+            return new Study(Integer.parseInt(source.toString()));
+        }
+    }
+
+    @ParameterizedTest(name = "{index} message = {0}")
+    @CsvSource({"10, 'java study'", "20, spring"})
+    void parameterizedTest3(ArgumentsAccessor argumentsAccessor) {
+        Study study = new Study(argumentsAccessor.getInteger(0), argumentsAccessor.getString(1));
+        System.out.println("study = " + study);
+    }
+
+
+
+    @ParameterizedTest(name = "{index} message = {0}")
+    @CsvSource({"10, 'java study'", "20, spring"})
+    void parameterizedTest4(@AggregateWith(StudyAggregator.class) Study study) {
+        System.out.println("study = " + study);
+    }
+
+    static class StudyAggregator implements ArgumentsAggregator {
+        @Override
+        public Object aggregateArguments(ArgumentsAccessor argumentsAccessor, ParameterContext parameterContext) throws ArgumentsAggregationException {
+            Study study = new Study(argumentsAccessor.getInteger(0), argumentsAccessor.getString(1));
+            return study;
+        }
+    }
+
+
     @BeforeAll
     static void beforeAll() {
-        System.out.println("before all" );
+        System.out.println("before all");
     }
 
     @AfterAll
