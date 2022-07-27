@@ -26,10 +26,16 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.junit.jupiter.api.Assumptions.assumingThat;
 
+
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class StudyTest {
 
-    @DisplayName("")
+    int value = 1;
+
+    @Order(2)
+    @DisplayName("study")
     @EnabledOnOs(OS.WINDOWS)
     @FastTest
     void create_new_study() {
@@ -71,7 +77,7 @@ class StudyTest {
 
     }
 
-
+    @Order(1)
     @SlowTest
     void create_new_study_again() {
         System.out.println("create1");
