@@ -5,7 +5,9 @@ import me.dongguen.junit.annotation.SlowTest;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ParameterContext;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.aggregator.AggregateWith;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
@@ -27,18 +29,23 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.junit.jupiter.api.Assumptions.assumingThat;
 
 
+//@ExtendWith(FindSlowTestExtension.class)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+//@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class StudyTest {
 
     int value = 1;
+
+    @RegisterExtension
+    static FindSlowTestExtension findSlowTestExtension = new FindSlowTestExtension(1000L);
 
     @Order(2)
     @DisplayName("study")
     @EnabledOnOs(OS.WINDOWS)
     @FastTest
     void create_new_study() {
+        System.out.println("value = " + value++);
         System.out.println(System.getenv("USERNAME"));
         //특정 환경변수에서만 실행
         assumeTrue("anoma".equalsIgnoreCase(System.getenv("USERNAME")));
@@ -80,6 +87,7 @@ class StudyTest {
     @Order(1)
     @SlowTest
     void create_new_study_again() {
+        System.out.println("value = " + value++);
         System.out.println("create1");
     }
 
@@ -133,6 +141,16 @@ class StudyTest {
             Study study = new Study(argumentsAccessor.getInteger(0), argumentsAccessor.getString(1));
             return study;
         }
+    }
+
+    @SlowTest
+    void create_extension_test() throws InterruptedException {
+        Thread.sleep(1005L);
+    }
+
+    @Test
+    void create_extension_test2() throws InterruptedException {
+        Thread.sleep(1005L);
     }
 
 
