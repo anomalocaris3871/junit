@@ -1,11 +1,11 @@
 package me.dongguen.junit;
 
+import me.dongguen.domain.Study;
 import me.dongguen.junit.annotation.FastTest;
 import me.dongguen.junit.annotation.SlowTest;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -20,8 +20,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
-
-import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -54,12 +52,12 @@ class StudyTest {
 
         assumingThat("LOCAL".equalsIgnoreCase(System.getenv("USERNAME")), () -> {
             Study actual = new Study(10);
-            assertThat(actual.getLimit()).isGreaterThan(0);
+            assertThat(actual.getLimitCount()).isGreaterThan(0);
         });
 
         assumingThat("anoma".equalsIgnoreCase(System.getenv("USERNAME")), () -> {
             Study actual = new Study(10);
-            assertThat(actual.getLimit()).isGreaterThan(5);
+            assertThat(actual.getLimitCount()).isGreaterThan(5);
         });
 
 
@@ -109,7 +107,7 @@ class StudyTest {
     @ParameterizedTest(name = "{index} message = {0}")
     @ValueSource(ints = {10, 20, 40})
     void parameterizedTest2(@ConvertWith(StudyConverter.class) Study study) {
-        System.out.println(study.getLimit());
+        System.out.println(study.getLimitCount());
     }
 
     static class StudyConverter extends SimpleArgumentConverter {
